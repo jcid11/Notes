@@ -121,16 +121,17 @@ class NoteBubble extends StatelessWidget {
       );
     }
   }
+  //
 
   numberCount() {
-    int s = 1;
+    int a = 1;
     int t = noteModel.list.length;
     int x = 3;
     for (int i = 1; t >= 3 && x <= t; i++) {
       x++;
-      s = i;
+      a = i;
     }
-    return '+$s';
+    return '+$a';
   }
 
   @override
