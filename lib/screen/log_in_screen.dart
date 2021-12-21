@@ -1,5 +1,4 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:note_project/screen/home.dart';
@@ -17,10 +16,6 @@ class _LogInScreenState extends State<LogInScreen> {
   final _auth = FirebaseAuth.instance;
   String email;
   String password;
-  @override
-  void initState() {
-    super.initState();
-  }
 
   void currentUser() async{
     final user = await _auth.currentUser;

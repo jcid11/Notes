@@ -1,17 +1,13 @@
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:note_project/model/user_model.dart';
 import 'package:note_project/screen/all_files_screen.dart';
 import 'package:note_project/screen/folders_screen.dart';
 import 'package:note_project/screen/log_in_screen.dart';
 import 'package:note_project/services/user_service.dart';
 import 'package:note_project/utilities/constant.dart';
-import 'package:note_project/containerlisttypes.dart';
+
 import '../add_newnote_button.dart';
-import '../card_content.dart';
 
 class HomePage extends StatelessWidget {
   static const id = 'home_screen';
@@ -22,7 +18,11 @@ class HomePage extends StatelessWidget {
       child: Scaffold(
           floatingActionButton: Row(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[newNoteButton()],
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: <Widget>[Padding(
+              padding: const EdgeInsets.only(left: 24.0),
+              child: newNoteButton(),
+            )],
           ),
           backgroundColor: Colors.white,
           appBar: PreferredSize(

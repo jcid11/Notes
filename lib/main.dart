@@ -32,7 +32,6 @@ class _MyAppState extends State<MyApp> {
       theme: ThemeData(
         primarySwatch: Colors.blue,
         accentColor: Colors.blueGrey,
-
       ),
       initialRoute: UserService.checkIfUserIsLogged() ? HomePage.id: LogInScreen.id,
       routes: {

@@ -3,13 +3,16 @@ import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:intl/intl.dart';
+import 'package:note_project/screen/new_note.dart';
 import 'package:note_project/utilities/constant.dart';
 
 import 'notes_model.dart';
 
 class NoteStream extends StatelessWidget {
   final _firestore = FirebaseFirestore.instance;
+
 
   @override
   Widget build(BuildContext context) {
@@ -47,40 +50,65 @@ class NoteStream extends StatelessWidget {
         //   },
         // );
 
-        if(!snapshot.hasData){
-          return Text('There s no data implemented yet');
+        if (!snapshot.hasData) {
+          return CircularProgressIndicator();
         }
         List<NoteModel> ListModel = [];
         final notes = snapshot.data.docs;
-        for(var note in notes){
+        for (var note in notes) {
           final messageText = note.get('title');
           final messageNote = note.get('note');
           final messageList = note.get('lista');
           final messageDate = note.get('date');
-
-          ListModel.add(NoteModel(title: messageText,note: messageNote,list: messageList,date: messageDate));
+          final docId = note.id;
+          ListModel.add(NoteModel(
+              title: messageText,
+              note: messageNote,
+              list: messageList,
+              date: messageDate,
+          id: docId));
         }
-        return GridView.builder(
+        return StaggeredGridView.countBuilder(
           itemCount: ListModel.length,
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2, crossAxisSpacing: 20, mainAxisSpacing: 20),
-          itemBuilder: (BuildContext context,int index){
-            return NoteBubble(index: index,noteModel: ListModel[index],);
+          crossAxisCount: 2,
+          itemBuilder: (BuildContext context, int index) {
+            return NoteBubble(
+              index: index,
+              noteModel: ListModel[index],
+            );
           },
+          staggeredTileBuilder: (int index) => StaggeredTile.fit(1),
+          mainAxisSpacing: 18,
+          crossAxisSpacing: 18,
         );
+
+        // GridView.builder(
+        //   itemCount: ListModel.length,
+        //   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        //       crossAxisCount: 2, crossAxisSpacing: 20, mainAxisSpacing: 20),
+        //   itemBuilder: (BuildContext context, int index) {
+        //     return NoteBubble(index: index, noteModel: ListModel[index],);
+        //   },
+        // );
       },
     );
   }
 }
 
-class NoteBubble extends StatelessWidget {
+class NoteBubble extends StatefulWidget {
   final int index;
   final NoteModel noteModel;
+  bool update;
 
-  NoteBubble({this.index, this.noteModel});
+  NoteBubble({this.index, this.noteModel, this.update});
+  @override
+  _NoteBubbleState createState() => _NoteBubbleState();
+}
+
+class _NoteBubbleState extends State<NoteBubble> {
 
   titleText() {
-    int stringNumber = noteModel.list[1]['title'].length;
+    int stringNumber = widget.noteModel.list[1]['title'].length;
     if (stringNumber >= 9) {
       return Expanded(
         child: Padding(
@@ -93,7 +121,7 @@ class NoteBubble extends StatelessWidget {
                 padding: const EdgeInsets.only(
                     top: 2.0, bottom: 2, left: 5, right: 5),
                 child: Text(
-                  noteModel.list[1]['title'],
+                  widget.noteModel.list[1]['title'],
                   softWrap: false,
                   overflow: TextOverflow.ellipsis,
                   style: kStyleContainerText,
@@ -112,7 +140,7 @@ class NoteBubble extends StatelessWidget {
               padding:
                   const EdgeInsets.only(top: 2.0, bottom: 2, left: 5, right: 5),
               child: Text(
-                noteModel.list[1]['title'],
+                widget.noteModel.list[1]['title'],
                 softWrap: false,
                 overflow: TextOverflow.ellipsis,
                 style: kStyleContainerText,
@@ -121,11 +149,10 @@ class NoteBubble extends StatelessWidget {
       );
     }
   }
-  //
 
   numberCount() {
     int a = 1;
-    int t = noteModel.list.length;
+    int t = widget.noteModel.list.length;
     int x = 3;
     for (int i = 1; t >= 3 && x <= t; i++) {
       x++;
@@ -134,38 +161,55 @@ class NoteBubble extends StatelessWidget {
     return '+$a';
   }
 
+@override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
-        color: Colors.grey[200],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.only(top: 14.0, left: 12, right: 4),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              DateFormat.MMMd().format(noteModel.date.toDate()),
-              style: TextStyle(color: appBarContainerFontColor,fontSize: 12),
+    return Column(
+      children: [
+        RawMaterialButton(
+          onPressed: (){
+            widget.update=true;
+            Navigator.push(context, MaterialPageRoute(builder: (context)=>NewNote(id: widget.noteModel.id,note: widget.noteModel.note,title: widget.noteModel.title,date: widget.noteModel.date,list: [widget.noteModel.list],update:widget.update)));
+            print(widget.update);
+          },
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              color: Colors.grey[200],
             ),
-            SizedBox(
-              height: 5,
-            ),
-            Text(
-              noteModel.title ?? 'Sin titulo',
-              style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                  color: appBarContainerFontColor),
-            ),
-            Container(
-                height: 36,
-                child: Row(
-                  children: [
-                    noteModel.list.length >= 3
-                        ? Expanded(
+            child: Padding(
+              padding:
+                  const EdgeInsets.only(top: 14.0, left: 12, right: 4, bottom: 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    DateFormat.MMMd().format(widget.noteModel.date.toDate()),
+                    style:
+                        TextStyle(color: appBarContainerFontColor, fontSize: 12),
+                  ),
+                  SizedBox(
+                    height: 1,
+                  ),
+                  Text(
+                    widget.noteModel.title ?? 'Sin titulo',
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        color: appBarContainerFontColor),
+                  ),
+                  Container(
+                      height: 35,
+                      child: Row(
+                        children: [
+                          widget.noteModel.list.length >= 3
+                              ? Expanded(
                             child: Row(
                               children: [
                                 Padding(
@@ -175,7 +219,7 @@ class NoteBubble extends StatelessWidget {
                                       decoration: BoxDecoration(
                                           color: Colors.grey[350],
                                           borderRadius:
-                                              BorderRadius.circular(5)),
+                                          BorderRadius.circular(5)),
                                       child: Padding(
                                         padding: const EdgeInsets.only(
                                             top: 2.0,
@@ -183,7 +227,7 @@ class NoteBubble extends StatelessWidget {
                                             left: 5,
                                             right: 5),
                                         child: Text(
-                                          noteModel.list[0]['title'],
+                                          widget.noteModel.list[0]['title'],
                                           style: kStyleContainerText,
                                         ),
                                       )),
@@ -195,34 +239,44 @@ class NoteBubble extends StatelessWidget {
                                         borderRadius:
                                         BorderRadius.circular(5)),
                                     child: Padding(
-                                      padding: const EdgeInsets.symmetric(horizontal: 4,vertical: 2),
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 4, vertical: 2),
                                       child: Text(
-                                  numberCount(),
-                                  style: kStyleContainerText,
-                                ),
+                                        numberCount(),
+                                        style: kStyleContainerText,
+                                      ),
                                     ))
                               ],
                             ),
                           )
-                        : Expanded(
+                              : Expanded(
                             child: ListView.builder(
-                              itemCount: noteModel.list.length >= 3
+                              itemCount: widget.noteModel.list.length >= 3
                                   ? 2
-                                  : noteModel.list.length,
+                                  : widget.noteModel.list.length,
                               scrollDirection: Axis.horizontal,
-                              itemBuilder: (BuildContext context, int index) {
+                              itemBuilder:
+                                  (BuildContext context, int index) {
                                 return listFirebase(
                                     index: index,
-                                    list: noteModel.list[index]['title']);
+                                    list: widget.noteModel.list[index]['title']);
                               },
                             ),
                           ),
-                  ],
-                )),
-            Text(noteModel.note ?? 'Sin nota')
-          ],
+                        ],
+                      )),
+                  Text(
+                    widget.noteModel.note ?? 'Sin nota',
+                    maxLines: 4,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(color: Colors.blueGrey[600]),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ),
-      ),
+      ],
     );
   }
 }

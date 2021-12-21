@@ -89,6 +89,7 @@ class RegistrationScreen extends StatelessWidget {
                                 print (e);
                                 }},
                           minWidth: 200.0,
+
                           height: 42.0,
                           child: Text(
                             'Register',
